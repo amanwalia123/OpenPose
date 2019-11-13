@@ -8,10 +8,17 @@
 #include <iostream>
 #include "Timer.h"
 #include <iterator>
+#include <future>
 
 const int nPoints = 18;
 const int indexPoints_used[] = {1,8,9,11,12};
 const int numPoints_used = sizeof(indexPoints_used)/sizeof(indexPoints_used[0]);
+
+
+//typedef struct{
+//  int channelNum;
+//
+//};
 
 const std::string keypointsMapping[] = {
     "Nose", "Neck",
@@ -47,7 +54,6 @@ std::vector<float> readData(const std::string &filename) {
 
 cv::Mat getOutputBlob(std::vector<float> &vector, int width, int height, int channels) {
 
-//  std::chrono::time_point<std::chrono::system_clock> startTP = std::chrono::system_clock::now();
   cv::Mat vec = cv::Mat(1, vector.size(), CV_32FC1, vector.data());
   std::vector<cv::Mat> channelVector(channels);
 
@@ -59,10 +65,6 @@ cv::Mat getOutputBlob(std::vector<float> &vector, int width, int height, int cha
 
   cv::Mat heatMap;
   cv::merge(channelVector, heatMap);
-  std::chrono::time_point<std::chrono::system_clock> finishTP = std::chrono::system_clock::now();
-
-//  std::cout << "Time Taken in reshaping vector = "
-//            << std::chrono::duration_cast<std::chrono::milliseconds>(finishTP - startTP).count() << " ms" << std::endl;
 
   return heatMap;
 
@@ -70,7 +72,6 @@ cv::Mat getOutputBlob(std::vector<float> &vector, int width, int height, int cha
 
 void getKeyPoints(cv::Mat &probMap, double threshold, std::vector<cv::Point2d> &keyPoints) {
 
-//  std::chrono::time_point<std::chrono::system_clock> startTP = std::chrono::system_clock::now();
   cv::Mat smoothProbMap;
   cv::GaussianBlur(probMap, smoothProbMap, cv::Size(3, 3), 0, 0);
 
@@ -95,9 +96,6 @@ void getKeyPoints(cv::Mat &probMap, double threshold, std::vector<cv::Point2d> &
     keyPoints.push_back(maxLoc);
   }
 
-//  std::chrono::time_point<std::chrono::system_clock> finishTP = std::chrono::system_clock::now();
-//  std::cout << "Time Taken in getting keypoints = "
-//            << std::chrono::duration_cast<std::chrono::milliseconds>(finishTP - startTP).count() << " ms" << std::endl;
 }
 
 void getSingleKeyPoint(cv::Mat &probMap, double threshold, cv::Point2i &keyPoint) {
@@ -138,6 +136,8 @@ void getSingleKeyPoint(cv::Mat &probMap, double threshold, cv::Point2i &keyPoint
 
 }
 
+//static void resizeChannel()
+
 void splitNetOutputBlobToParts(cv::Mat &netOutputBlob,
                                const cv::Size &targetSize,
                                std::vector<cv::Mat> &netOutputParts) {
@@ -148,8 +148,8 @@ void splitNetOutputBlobToParts(cv::Mat &netOutputBlob,
   cv::Mat channels[nParts];
   cv::split(netOutputBlob, channels);
 
-  for (int i = 0; i < nParts; ++i) {
-//    for(auto i : indexPoints_used){
+//  for (int i = 0; i < nParts; ++i) {
+    for(auto i : indexPoints_used){
     cv::Mat part = channels[i];
 
     cv::Mat resizedPart;
@@ -186,8 +186,8 @@ void postprocessing(std::vector<float> &vector, int width, int height, int chann
 
 
 //  for (int i = 0; i < nPoints; ++i) {
-  for(auto i :indexPoints_used ){
-//    for(int i =0;i<numPoints_used;i++){
+//  for(auto i :indexPoints_used ){
+    for(int i =0;i<numPoints_used;i++){
     cv::Point2i keyPoint;
     getSingleKeyPoint(netOutputParts[i], 0.1, keyPoint);
 
