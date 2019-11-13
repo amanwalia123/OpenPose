@@ -6,9 +6,12 @@
 #include<opencv2/imgproc.hpp>
 #include<opencv2/highgui.hpp>
 #include <iostream>
-
+#include "Timer.h"
+#include <iterator>
 
 const int nPoints = 18;
+const int indexPoints_used[] = {1,8,9,11,12};
+const int numPoints_used = sizeof(indexPoints_used)/sizeof(indexPoints_used[0]);
 
 const std::string keypointsMapping[] = {
     "Nose", "Neck",
@@ -146,6 +149,7 @@ void splitNetOutputBlobToParts(cv::Mat &netOutputBlob,
   cv::split(netOutputBlob, channels);
 
   for (int i = 0; i < nParts; ++i) {
+//    for(auto i : indexPoints_used){
     cv::Mat part = channels[i];
 
     cv::Mat resizedPart;
@@ -157,25 +161,41 @@ void splitNetOutputBlobToParts(cv::Mat &netOutputBlob,
 }
 
 void postprocessing(std::vector<float> &vector, int width, int height, int channels,
-                                        int frameWidth, int frameHeight,std::vector<int> &result) {
+                    int frameWidth, int frameHeight, std::vector<int> &result) {
 
   //1. Get Heatmaps corresponding to each chanel
-  cv::Mat heatMap = getOutputBlob(vector, width, height, channels);
 
-  //2. Resize Heatmaps to dimension of image
+
+  Timer t1("Heatmap");
+  cv::Mat heatMap = getOutputBlob(vector, width, height, channels);
+  t1.stop();
+
+
+  Timer t2("Resizing heatmap");
   std::vector<cv::Mat> netOutputParts;
   splitNetOutputBlobToParts(heatMap, cv::Size(frameWidth, frameHeight), netOutputParts);
+  t2.stop();
+
 
   //3.Get the Keypoints
 
+
+  Timer t3("Keypoints detection");
+
   std::vector<cv::Point2i> detectedKeypoints;
 
-  for (int i = 0; i < nPoints; ++i) {
+
+//  for (int i = 0; i < nPoints; ++i) {
+  for(auto i :indexPoints_used ){
+//    for(int i =0;i<numPoints_used;i++){
     cv::Point2i keyPoint;
     getSingleKeyPoint(netOutputParts[i], 0.1, keyPoint);
 
-      result.push_back(keyPoint.x);
-      result.push_back(keyPoint.y);
+    result.push_back(keyPoint.x);
+    result.push_back(keyPoint.y);
 
   }
+  t3.stop();
+
+
 }
