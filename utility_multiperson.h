@@ -11,6 +11,23 @@
 #include <future>
 #include <set>
 
+/*
+ *
+ * 1. Read vector and convert it into heatmaps (getOutputBlob) [Done]
+ *                            |
+ *                            Y  
+ * 2. Resize heatmaps to appropriate dimensions (splitNetOutputBlobToParts) [Done]
+ *                            |
+ *                            Y
+ * 3. Detect Keypoints based upon all the points which classify for threshold in resized heatmaps(getMultiPersonKeyPoints) [Done]
+ *                            |
+ *                            Y  
+ * 4. Get valid and invalid pairs of keypoints for persons (getValidPairs) [Done]
+ *                            |
+ *                            Y
+ * 5. Get keypoints for each person (getPersonWiseKeyPoints)  []
+ */
+
 const int nPoints = 18;
 const int indexPoints_used[] = {1, 8, 9, 11, 12};
 const int numPoints_used = sizeof(indexPoints_used) / sizeof(indexPoints_used[0]);
@@ -375,15 +392,4 @@ void postprocessing(std::vector<float> &vector, int width, int height, int chann
 
 
 
-/*
- *
- * 1. Read vector and convert it into heatmaps (getOutputBlob) [Done]
- *                            |
- * 2. Resize heatmaps to appropriate dimensions (splitNetOutputBlobToParts) [Done]
- *                            |
- * 3. Detect Keypoints based upon all the points which classify for threshold in resized heatmaps(getMultiPersonKeyPoints) [Done]
- *                            |
- * 4. Get valid and invalid pairs of keypoints for persons (getValidPairs) [Done]
- *                            |
- * 5. Get keypoints for each person (getPersonWiseKeyPoints)  []
- */
+
